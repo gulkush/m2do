@@ -10,11 +10,14 @@ window.todoApp = function todoApp() {
     },
     selectedToTab: "All",
     expandedSection: "today",
-    copyFeedback: {
-      today: false,
-      future: false,
-      closed: false,
-    },
+    copyFeedback: { today: false, future: false, closed: false },
+    toastVisible: false,
+    toastMessage: "",
+    toastTimer: null,
+    statusConfirmOpen: false,
+    statusTargetTaskId: "",
+    statusTargetTo: "Open",
+    statusUpdatingId: "",
     tasks: [],
     modalOpen: false,
     historyModalOpen: false,
@@ -76,12 +79,18 @@ window.todoApp = function todoApp() {
         changes: Object.entries(entry.changes || {})
           .map(([field, value]) => {
             if (Object.prototype.hasOwnProperty.call(value, "from")) {
-              return `${field}: "${value.from}" -> "${value.to}"`;
+              return `${field}: \"${value.from}\" -> \"${value.to}\"`;
             }
-            return `${field}: "${value.to}"`;
+            return `${field}: \"${value.to}\"`;
           })
           .join("\n"),
       }));
+    },
+
+    get canDeleteCurrentTask() {
+      if (!this.editingTaskId) return false;
+      const detailsValue = (this.form.details || "").trim();
+      return this.form.status === "Closed" && detailsValue === "";
     },
 
     setupFirebase() {
@@ -169,46 +178,23 @@ window.todoApp = function todoApp() {
       return this.assigneeRowClasses[task.to] || "bg-slate-50";
     },
 
-    setExpandedSection(section) {
-      this.expandedSection = section;
+    cardContainerClass(task) {
+      const map = {
+        MNB: "border-rose-200 bg-rose-50/60",
+        SHR: "border-amber-200 bg-amber-50/60",
+        PRD: "border-emerald-200 bg-emerald-50/60",
+        SMB: "border-sky-200 bg-sky-50/60",
+        GMB: "border-violet-200 bg-violet-50/60",
+      };
+      return map[task.to] || "border-slate-200 bg-slate-50";
     },
 
-    sectionTasks(section) {
-      if (section === "today") return this.todayTasks;
-      if (section === "future") return this.futureTasks;
-      return this.closedTasks;
+    statusClass(task) {
+      return task.status === "Open" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700";
     },
 
-    async copySectionTasks(section) {
-      const rows = this.sectionTasks(section);
-      const header = `${this.selectedToTab}'s Tasks`;
-      const numberedSubjects = rows.map((task, idx) => `${idx + 1}. ${task.subject}`).join("\n");
-      const text = numberedSubjects ? `${header}\n${numberedSubjects}` : `${header}\nNo tasks`;
-
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const input = document.createElement("textarea");
-          input.value = text;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand("copy");
-          document.body.removeChild(input);
-        }
-        this.copyFeedback[section] = true;
-        setTimeout(() => {
-          this.copyFeedback[section] = false;
-        }, 1400);
-      } catch (err) {
-        this.firebaseError = `Copy failed: ${err.message}`;
-      }
-    },
-
-    get canDeleteCurrentTask() {
-      if (!this.editingTaskId) return false;
-      const detailsValue = (this.form.details || "").trim();
-      return this.form.status === "Closed" && detailsValue === "";
+    statusButtonText(task) {
+      return this.statusUpdatingId === task.id ? "..." : task.status;
     },
 
     toTabClass(tab) {
@@ -233,6 +219,113 @@ window.todoApp = function todoApp() {
         GMB: "bg-violet-100 text-violet-800 hover:bg-violet-200",
       };
       return inactive[tab] || "bg-slate-100 text-slate-700 hover:bg-slate-200";
+    },
+
+    sectionTasks(section) {
+      if (section === "today") return this.todayTasks;
+      if (section === "future") return this.futureTasks;
+      return this.closedTasks;
+    },
+
+    sectionLabel(section) {
+      if (section === "today") return `${this.selectedToTab} TODAY (${this.todayTasks.length})`;
+      if (section === "future") return `${this.selectedToTab} FUTURE (${this.futureTasks.length})`;
+      return `${this.selectedToTab} CLOSED (${this.closedTasks.length})`;
+    },
+
+    sectionEmptyLabel(section) {
+      if (section === "today") return "No today tasks.";
+      if (section === "future") return "No future tasks.";
+      return "No closed tasks.";
+    },
+
+    setExpandedSection(section) {
+      this.expandedSection = section;
+      const el = document.getElementById(`section-${section}`);
+      if (el && window.innerWidth < 768) {
+        requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+      }
+    },
+
+    copyButtonLabel(section) {
+      return this.copyFeedback[section] ? "Copied" : "Copy";
+    },
+
+    copyButtonDisabled(section) {
+      return this.sectionTasks(section).length === 0;
+    },
+
+    async copySectionTasks(section) {
+      const rows = this.sectionTasks(section);
+      if (rows.length === 0) {
+        this.showToast("No tasks to copy.");
+        return;
+      }
+
+      const header = `${this.selectedToTab}'s Tasks`;
+      const numberedSubjects = rows.map((task, idx) => `${idx + 1}. ${task.subject}`).join("\n");
+      const text = `${header}\n${numberedSubjects}`;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const input = document.createElement("textarea");
+          input.value = text;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          document.body.removeChild(input);
+        }
+        this.copyFeedback[section] = true;
+        setTimeout(() => {
+          this.copyFeedback[section] = false;
+        }, 1400);
+        this.showToast(`Copied ${rows.length} task${rows.length === 1 ? "" : "s"}.`);
+      } catch (err) {
+        this.firebaseError = `Copy failed: ${err.message}`;
+      }
+    },
+
+    showToast(message) {
+      this.toastMessage = message;
+      this.toastVisible = true;
+      if (this.toastTimer) clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => {
+        this.toastVisible = false;
+      }, 1800);
+    },
+
+    closeToast() {
+      this.toastVisible = false;
+      if (this.toastTimer) clearTimeout(this.toastTimer);
+    },
+
+    openStatusConfirm(task) {
+      const fromStatus = task.status === "Closed" ? "Closed" : "Open";
+      this.statusTargetTo = fromStatus === "Open" ? "Closed" : "Open";
+      this.statusTargetTaskId = task.id;
+      this.statusConfirmOpen = true;
+    },
+
+    closeStatusConfirm() {
+      this.statusConfirmOpen = false;
+      this.statusTargetTaskId = "";
+    },
+
+    statusConfirmMessage() {
+      if (!this.statusTargetTaskId) return "";
+      const task = this.tasks.find((x) => x.id === this.statusTargetTaskId);
+      if (!task) return "";
+      return `Do you want change the status from ${task.status.toLowerCase()} to ${this.statusTargetTo.toLowerCase()}?`;
+    },
+
+    async confirmStatusChange() {
+      if (!this.statusTargetTaskId) return;
+      const task = this.tasks.find((x) => x.id === this.statusTargetTaskId);
+      this.closeStatusConfirm();
+      if (!task) return;
+      await this.toggleTaskStatus(task);
     },
 
     async signOut() {
@@ -305,10 +398,10 @@ window.todoApp = function todoApp() {
 
     async toggleTaskStatus(task) {
       if (!this.db || !task || !task.id) return;
+      this.statusUpdatingId = task.id;
+
       const fromStatus = task.status === "Closed" ? "Closed" : "Open";
       const toStatus = fromStatus === "Open" ? "Closed" : "Open";
-      const confirmMessage = `Do you want change the status from ${fromStatus.toLowerCase()} to ${toStatus.toLowerCase()}?`;
-      if (!window.confirm(confirmMessage)) return;
 
       const statusHistoryEntry = {
         action: "UPDATED",
@@ -324,8 +417,11 @@ window.todoApp = function todoApp() {
           history: [...(task.history || []), statusHistoryEntry],
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
+        this.showToast(`Status changed to ${toStatus}.`);
       } catch (err) {
         this.firebaseError = `Status update failed: ${err.message}`;
+      } finally {
+        this.statusUpdatingId = "";
       }
     },
 
@@ -413,6 +509,22 @@ window.todoApp = function todoApp() {
       } finally {
         this.saving = false;
       }
+    },
+
+    historyAriaLabel(task) {
+      return `View history for ${task.subject}`;
+    },
+
+    statusAriaLabel(task) {
+      return `Toggle status for ${task.subject}`;
+    },
+
+    editAriaLabel(task, field) {
+      return `Edit task ${field} for ${task.subject}`;
+    },
+
+    detailText(task) {
+      return task.details && task.details.trim() ? task.details : "No details";
     },
   };
 };

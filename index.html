@@ -112,6 +112,14 @@
             </tbody>
           </table>
         </div>
+        <div x-show="expandedSection === 'today'" class="mt-2 flex justify-center" style="display: none">
+          <button
+            type="button"
+            @click="copySectionTasks('today')"
+            class="rounded bg-cyan-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-cyan-600"
+            x-text="copyFeedback.today ? 'Copied' : 'Copy'"
+          ></button>
+        </div>
 
         <button
           type="button"
@@ -174,6 +182,14 @@
             </tbody>
           </table>
         </div>
+        <div x-show="expandedSection === 'future'" class="mt-2 flex justify-center" style="display: none">
+          <button
+            type="button"
+            @click="copySectionTasks('future')"
+            class="rounded bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-600"
+            x-text="copyFeedback.future ? 'Copied' : 'Copy'"
+          ></button>
+        </div>
 
         <button
           type="button"
@@ -235,6 +251,14 @@
               </template>
             </tbody>
           </table>
+        </div>
+        <div x-show="expandedSection === 'closed'" class="mt-2 flex justify-center" style="display: none">
+          <button
+            type="button"
+            @click="copySectionTasks('closed')"
+            class="rounded bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-600"
+            x-text="copyFeedback.closed ? 'Copied' : 'Copy'"
+          ></button>
         </div>
       </section>
 

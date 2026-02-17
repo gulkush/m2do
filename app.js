@@ -10,6 +10,11 @@ window.todoApp = function todoApp() {
     },
     selectedToTab: "All",
     expandedSection: "today",
+    copyFeedback: {
+      today: false,
+      future: false,
+      closed: false,
+    },
     tasks: [],
     modalOpen: false,
     historyModalOpen: false,
@@ -166,6 +171,38 @@ window.todoApp = function todoApp() {
 
     setExpandedSection(section) {
       this.expandedSection = section;
+    },
+
+    sectionTasks(section) {
+      if (section === "today") return this.todayTasks;
+      if (section === "future") return this.futureTasks;
+      return this.closedTasks;
+    },
+
+    async copySectionTasks(section) {
+      const rows = this.sectionTasks(section);
+      const header = `${this.selectedToTab}'s Tasks`;
+      const numberedSubjects = rows.map((task, idx) => `${idx + 1}. ${task.subject}`).join("\n");
+      const text = numberedSubjects ? `${header}\n${numberedSubjects}` : `${header}\nNo tasks`;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const input = document.createElement("textarea");
+          input.value = text;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          document.body.removeChild(input);
+        }
+        this.copyFeedback[section] = true;
+        setTimeout(() => {
+          this.copyFeedback[section] = false;
+        }, 1400);
+      } catch (err) {
+        this.firebaseError = `Copy failed: ${err.message}`;
+      }
     },
 
     get canDeleteCurrentTask() {

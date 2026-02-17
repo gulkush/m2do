@@ -9,6 +9,7 @@ window.todoApp = function todoApp() {
       GMB: "bg-violet-50",
     },
     selectedToTab: "All",
+    expandedSection: "today",
     tasks: [],
     modalOpen: false,
     historyModalOpen: false,
@@ -161,6 +162,10 @@ window.todoApp = function todoApp() {
 
     rowClass(task) {
       return this.assigneeRowClasses[task.to] || "bg-slate-50";
+    },
+
+    setExpandedSection(section) {
+      this.expandedSection = section;
     },
 
     get canDeleteCurrentTask() {

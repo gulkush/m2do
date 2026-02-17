@@ -51,8 +51,15 @@
       ></div>
 
       <section x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
-        <h3 class="mb-3 text-sm font-semibold tracking-wide text-cyan-800" x-text="`${selectedToTab} TODAY (${todayTasks.length})`"></h3>
-        <div class="max-h-[22rem] overflow-auto">
+        <button
+          type="button"
+          @click="setExpandedSection('today')"
+          class="mb-3 flex w-full items-center justify-between rounded-md bg-cyan-50 px-3 py-2 text-left text-sm font-semibold tracking-wide text-cyan-800"
+        >
+          <span x-text="`${selectedToTab} TODAY (${todayTasks.length})`"></span>
+          <span class="text-xs" x-text="expandedSection === 'today' ? '▲' : '▼'"></span>
+        </button>
+        <div x-show="expandedSection === 'today'" class="max-h-[22rem] overflow-auto" style="display: none">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -106,8 +113,15 @@
           </table>
         </div>
 
-        <h3 class="mb-3 mt-6 text-sm font-semibold tracking-wide text-indigo-800" x-text="`${selectedToTab} FUTURE (${futureTasks.length})`"></h3>
-        <div class="max-h-[22rem] overflow-auto">
+        <button
+          type="button"
+          @click="setExpandedSection('future')"
+          class="mb-3 mt-6 flex w-full items-center justify-between rounded-md bg-indigo-50 px-3 py-2 text-left text-sm font-semibold tracking-wide text-indigo-800"
+        >
+          <span x-text="`${selectedToTab} FUTURE (${futureTasks.length})`"></span>
+          <span class="text-xs" x-text="expandedSection === 'future' ? '▲' : '▼'"></span>
+        </button>
+        <div x-show="expandedSection === 'future'" class="max-h-[22rem] overflow-auto" style="display: none">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -161,8 +175,15 @@
           </table>
         </div>
 
-        <h3 class="mb-3 mt-6 text-sm font-semibold tracking-wide text-slate-800" x-text="`${selectedToTab} CLOSED (${closedTasks.length})`"></h3>
-        <div class="max-h-[22rem] overflow-auto">
+        <button
+          type="button"
+          @click="setExpandedSection('closed')"
+          class="mb-3 mt-6 flex w-full items-center justify-between rounded-md bg-slate-100 px-3 py-2 text-left text-sm font-semibold tracking-wide text-slate-800"
+        >
+          <span x-text="`${selectedToTab} CLOSED (${closedTasks.length})`"></span>
+          <span class="text-xs" x-text="expandedSection === 'closed' ? '▲' : '▼'"></span>
+        </button>
+        <div x-show="expandedSection === 'closed'" class="max-h-[22rem] overflow-auto" style="display: none">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>

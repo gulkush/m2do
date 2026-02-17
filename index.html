@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>M2Do</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="./firebase-config.js"></script>
+    <script defer src="./app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <div x-data="todoApp()" x-init="init()" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight">List (MNB)</h1>
+          <p class="text-sm text-slate-600">Tasks grouped by assignee and date bucket.</p>
+        </div>
+        <button
+          x-show="authUser"
+          @click="openCreateModal()"
+          class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+          style="display: none"
+        >
+          + Add New
+        </button>
+      </header>
+      <div
+        x-show="firebaseError"
+        class="mb-4 rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+        x-text="firebaseError"
+      ></div>
+
+      <section class="mb-5 rounded-xl bg-white p-4 shadow-sm">
+        <div>
+            <h2 class="mb-3 text-lg font-semibold">Session</h2>
+            <p x-show="authLoading" class="text-sm text-slate-600">Connecting anonymously...</p>
+            <p x-show="authError" class="mt-2 text-sm text-rose-700" x-text="authError"></p>
+        </div>
+
+        <div x-show="authUser" style="display: none" class="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+            <p class="text-sm text-slate-700">
+              Signed in anonymously:
+              <span class="font-semibold" x-text="authUser && authUser.uid"></span>
+            </p>
+            <button
+              @click="signOut()"
+              class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            >
+              Reset Session
+            </button>
+          </div>
+      </section>
+
+      <section x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
+        <div class="mb-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+          <template x-for="tab in toTabs" :key="tab">
+            <button
+              @click="selectedToTab = tab"
+              class="rounded-md px-3 py-1.5 text-sm font-medium"
+              :class="toTabClass(tab)"
+            >
+              <span x-text="`${tab} (${taskCountForToTab(tab)})`"></span>
+            </button>
+          </template>
+        </div>
+
+        <h3 class="mb-3 text-sm font-semibold tracking-wide text-cyan-800" x-text="`TODAY (${todayTasks.length})`"></h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              <template x-if="todayTasks.length === 0">
+                <tr>
+                  <td colspan="5" class="px-3 py-8 text-center text-sm text-slate-500">No today tasks.</td>
+                </tr>
+              </template>
+              <template x-for="task in todayTasks" :key="task.id">
+                <tr :class="rowClass(task)">
+                  <td class="px-3 py-2 text-sm">
+                    <button
+                      @click="openHistoryModal(task)"
+                      class="rounded-md bg-slate-600 p-1.5 text-white hover:bg-slate-500"
+                      title="View history"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.27 2.943 9.542 7-1.273 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button @click="openEditModal(task)" class="font-medium text-slate-800 underline-offset-2 hover:underline" x-text="task.date"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button @click="openEditModal(task)" class="font-medium text-slate-800 underline-offset-2 hover:underline" x-text="task.to"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm font-medium">
+                    <button @click="openEditModal(task)" class="text-left text-slate-900 underline-offset-2 hover:underline" x-text="task.subject"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold"
+                      :class="task.status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
+                      x-text="task.status"
+                    ></span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="mb-3 mt-6 text-sm font-semibold tracking-wide text-indigo-800" x-text="`FUTURE (${futureTasks.length})`"></h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              <template x-if="futureTasks.length === 0">
+                <tr>
+                  <td colspan="5" class="px-3 py-8 text-center text-sm text-slate-500">No future tasks.</td>
+                </tr>
+              </template>
+              <template x-for="task in futureTasks" :key="task.id">
+                <tr :class="rowClass(task)">
+                  <td class="px-3 py-2 text-sm">
+                    <button
+                      @click="openHistoryModal(task)"
+                      class="rounded-md bg-slate-600 p-1.5 text-white hover:bg-slate-500"
+                      title="View history"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.27 2.943 9.542 7-1.273 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button @click="openEditModal(task)" class="font-medium text-slate-800 underline-offset-2 hover:underline" x-text="task.date"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button @click="openEditModal(task)" class="font-medium text-slate-800 underline-offset-2 hover:underline" x-text="task.to"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm font-medium">
+                    <button @click="openEditModal(task)" class="text-left text-slate-900 underline-offset-2 hover:underline" x-text="task.subject"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold"
+                      :class="task.status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
+                      x-text="task.status"
+                    ></span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="mb-3 mt-6 text-sm font-semibold tracking-wide text-slate-800" x-text="`CLOSED (${closedTasks.length})`"></h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              <template x-if="closedTasks.length === 0">
+                <tr>
+                  <td colspan="5" class="px-3 py-8 text-center text-sm text-slate-500">No closed tasks.</td>
+                </tr>
+              </template>
+              <template x-for="task in closedTasks" :key="task.id">
+                <tr :class="rowClass(task)">
+                  <td class="px-3 py-2 text-sm">
+                    <button
+                      @click="openHistoryModal(task)"
+                      class="rounded-md bg-slate-600 p-1.5 text-white hover:bg-slate-500"
+                      title="View history"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.27 2.943 9.542 7-1.273 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button @click="openEditModal(task)" class="font-medium text-slate-800 underline-offset-2 hover:underline" x-text="task.date"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button @click="openEditModal(task)" class="font-medium text-slate-800 underline-offset-2 hover:underline" x-text="task.to"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm font-medium">
+                    <button @click="openEditModal(task)" class="text-left text-slate-900 underline-offset-2 hover:underline" x-text="task.subject"></button>
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold"
+                      :class="task.status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
+                      x-text="task.status"
+                    ></span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div
+        x-show="modalOpen"
+        x-transition.opacity
+        class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 p-4"
+        style="display: none"
+      >
+        <div @click.outside="closeModal()" class="w-full max-w-3xl rounded-xl bg-white p-5 shadow-xl">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold" x-text="editingTaskId ? 'Edit Task' : 'Create Task'"></h2>
+            <div class="flex items-center gap-2">
+              <button
+                x-show="canDeleteCurrentTask"
+                @click="deleteCurrentTask()"
+                type="button"
+                class="rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-500"
+                style="display: none"
+              >
+                Delete
+              </button>
+              <button @click="closeModal()" class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+            </div>
+          </div>
+
+          <form @submit.prevent="saveTask()" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="font-medium text-slate-700">DATE</span>
+              <input x-model="form.date" type="date" required class="rounded-md border border-slate-300 px-3 py-2" />
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="font-medium text-slate-700">TO</span>
+              <select x-model="form.to" required class="rounded-md border border-slate-300 px-3 py-2">
+                <template x-for="person in assignees" :key="person">
+                  <option :value="person" x-text="person"></option>
+                </template>
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm md:col-span-2">
+              <span class="font-medium text-slate-700">SUBJECT</span>
+              <input x-model.trim="form.subject" type="text" required class="rounded-md border border-slate-300 px-3 py-2" />
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm md:col-span-2">
+              <span class="font-medium text-slate-700">DETAILS</span>
+              <textarea
+                x-model.trim="form.details"
+                rows="3"
+                class="rounded-md border border-slate-300 px-3 py-2"
+              ></textarea>
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="font-medium text-slate-700">STATUS</span>
+              <select x-model="form.status" required class="rounded-md border border-slate-300 px-3 py-2">
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </label>
+
+            <div class="md:col-span-2 flex justify-end gap-2 pt-2">
+              <button type="button" @click="closeModal()" class="rounded-md border border-slate-300 px-4 py-2 text-sm">Cancel</button>
+              <button
+                type="submit"
+                :disabled="saving"
+                class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span x-text="saving ? 'Saving...' : 'Save Task'"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div
+        x-show="historyModalOpen"
+        x-transition.opacity
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4"
+        style="display: none"
+      >
+        <div @click.outside="closeHistoryModal()" class="w-full max-w-3xl rounded-xl bg-white p-5 shadow-xl">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">History: <span x-text="historyTaskTitle"></span></h2>
+            <button @click="closeHistoryModal()" class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+          </div>
+          <textarea
+            :value="historyText"
+            readonly
+            rows="12"
+            class="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

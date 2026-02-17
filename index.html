@@ -35,20 +35,36 @@
           </div>
       </section>
 
-      <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight">List (MNB)</h1>
-          <p class="text-sm text-slate-600">Tasks grouped by assignee and date bucket.</p>
+      <div class="sticky top-0 z-30 bg-slate-100 pb-3">
+        <header class="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight">List (MNB)</h1>
+            <p class="text-sm text-slate-600">Tasks grouped by assignee and date bucket.</p>
+          </div>
+          <button
+            x-show="authUser"
+            @click="openCreateModal()"
+            class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+            style="display: none"
+          >
+            + Add New
+          </button>
+        </header>
+
+        <div x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
+          <div class="flex flex-wrap gap-2">
+            <template x-for="tab in toTabs" :key="tab">
+              <button
+                @click="selectedToTab = tab"
+                class="rounded-md px-4 py-2 text-base font-semibold"
+                :class="toTabClass(tab)"
+              >
+                <span x-text="`${tab} (${taskCountForToTab(tab)})`"></span>
+              </button>
+            </template>
+          </div>
         </div>
-        <button
-          x-show="authUser"
-          @click="openCreateModal()"
-          class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
-          style="display: none"
-        >
-          + Add New
-        </button>
-      </header>
+      </div>
       <div
         x-show="firebaseError"
         class="mb-4 rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700"
@@ -56,28 +72,16 @@
       ></div>
 
       <section x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
-        <div class="mb-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-          <template x-for="tab in toTabs" :key="tab">
-            <button
-              @click="selectedToTab = tab"
-              class="rounded-md px-3 py-1.5 text-sm font-medium"
-              :class="toTabClass(tab)"
-            >
-              <span x-text="`${tab} (${taskCountForToTab(tab)})`"></span>
-            </button>
-          </template>
-        </div>
-
         <h3 class="mb-3 text-sm font-semibold tracking-wide text-cyan-800" x-text="`TODAY (${todayTasks.length})`"></h3>
         <div class="max-h-[22rem] overflow-auto">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
@@ -128,11 +132,11 @@
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
@@ -183,11 +187,11 @@
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">View</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Date</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">To</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Subject</th>
+                <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
@@ -323,9 +327,9 @@
             <table class="min-w-full divide-y divide-slate-200">
               <thead class="bg-slate-50">
                 <tr>
-                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">CREATED</th>
-                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">TIME</th>
-                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">CHANGES</th>
+                  <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">CREATED</th>
+                  <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">TIME</th>
+                  <th class="sticky top-0 z-10 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">CHANGES</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">

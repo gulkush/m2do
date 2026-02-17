@@ -14,26 +14,6 @@
   </head>
   <body class="min-h-screen bg-slate-100 text-slate-900">
     <div x-data="todoApp()" x-init="init()" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight">List (MNB)</h1>
-          <p class="text-sm text-slate-600">Tasks grouped by assignee and date bucket.</p>
-        </div>
-        <button
-          x-show="authUser"
-          @click="openCreateModal()"
-          class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
-          style="display: none"
-        >
-          + Add New
-        </button>
-      </header>
-      <div
-        x-show="firebaseError"
-        class="mb-4 rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-        x-text="firebaseError"
-      ></div>
-
       <section class="mb-5 rounded-xl bg-white p-4 shadow-sm">
         <div>
             <h2 class="mb-3 text-lg font-semibold">Session</h2>
@@ -55,6 +35,26 @@
           </div>
       </section>
 
+      <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight">List (MNB)</h1>
+          <p class="text-sm text-slate-600">Tasks grouped by assignee and date bucket.</p>
+        </div>
+        <button
+          x-show="authUser"
+          @click="openCreateModal()"
+          class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+          style="display: none"
+        >
+          + Add New
+        </button>
+      </header>
+      <div
+        x-show="firebaseError"
+        class="mb-4 rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+        x-text="firebaseError"
+      ></div>
+
       <section x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
         <div class="mb-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
           <template x-for="tab in toTabs" :key="tab">
@@ -69,7 +69,7 @@
         </div>
 
         <h3 class="mb-3 text-sm font-semibold tracking-wide text-cyan-800" x-text="`TODAY (${todayTasks.length})`"></h3>
-        <div class="overflow-x-auto">
+        <div class="max-h-[22rem] overflow-auto">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -110,11 +110,12 @@
                     <button @click="openEditModal(task)" class="text-left text-slate-900 underline-offset-2 hover:underline" x-text="task.subject"></button>
                   </td>
                   <td class="px-3 py-2 text-sm">
-                    <span
+                    <button
+                      @click="toggleTaskStatus(task)"
                       class="rounded px-2 py-1 text-xs font-semibold"
                       :class="task.status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
                       x-text="task.status"
-                    ></span>
+                    ></button>
                   </td>
                 </tr>
               </template>
@@ -123,7 +124,7 @@
         </div>
 
         <h3 class="mb-3 mt-6 text-sm font-semibold tracking-wide text-indigo-800" x-text="`FUTURE (${futureTasks.length})`"></h3>
-        <div class="overflow-x-auto">
+        <div class="max-h-[22rem] overflow-auto">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -164,11 +165,12 @@
                     <button @click="openEditModal(task)" class="text-left text-slate-900 underline-offset-2 hover:underline" x-text="task.subject"></button>
                   </td>
                   <td class="px-3 py-2 text-sm">
-                    <span
+                    <button
+                      @click="toggleTaskStatus(task)"
                       class="rounded px-2 py-1 text-xs font-semibold"
                       :class="task.status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
                       x-text="task.status"
-                    ></span>
+                    ></button>
                   </td>
                 </tr>
               </template>
@@ -177,7 +179,7 @@
         </div>
 
         <h3 class="mb-3 mt-6 text-sm font-semibold tracking-wide text-slate-800" x-text="`CLOSED (${closedTasks.length})`"></h3>
-        <div class="overflow-x-auto">
+        <div class="max-h-[22rem] overflow-auto">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -218,11 +220,12 @@
                     <button @click="openEditModal(task)" class="text-left text-slate-900 underline-offset-2 hover:underline" x-text="task.subject"></button>
                   </td>
                   <td class="px-3 py-2 text-sm">
-                    <span
+                    <button
+                      @click="toggleTaskStatus(task)"
                       class="rounded px-2 py-1 text-xs font-semibold"
                       :class="task.status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
                       x-text="task.status"
-                    ></span>
+                    ></button>
                   </td>
                 </tr>
               </template>
@@ -296,7 +299,7 @@
               <button
                 type="submit"
                 :disabled="saving"
-                class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                class="rounded-md bg-slate-600 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span x-text="saving ? 'Saving...' : 'Save Task'"></span>
               </button>
@@ -316,12 +319,31 @@
             <h2 class="text-lg font-semibold">History: <span x-text="historyTaskTitle"></span></h2>
             <button @click="closeHistoryModal()" class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
           </div>
-          <textarea
-            :value="historyText"
-            readonly
-            rows="12"
-            class="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700"
-          ></textarea>
+          <div class="max-h-[22rem] overflow-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">CREATED</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">TIME</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">CHANGES</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 bg-white">
+                <template x-if="historyRows.length === 0">
+                  <tr>
+                    <td colspan="3" class="px-3 py-8 text-center text-sm text-slate-500">No history entries yet.</td>
+                  </tr>
+                </template>
+                <template x-for="(row, idx) in historyRows" :key="idx">
+                  <tr>
+                    <td class="px-3 py-2 text-sm font-medium text-slate-800" x-text="row.created"></td>
+                    <td class="px-3 py-2 text-sm text-slate-700" x-text="row.time"></td>
+                    <td class="px-3 py-2 text-xs text-slate-700 whitespace-pre-line" x-text="row.changes"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

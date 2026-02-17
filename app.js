@@ -63,26 +63,19 @@ window.todoApp = function todoApp() {
         .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
     },
 
-    get historyText() {
-      if (!this.historyEntries || this.historyEntries.length === 0) {
-        return "No history entries yet.";
-      }
-
-      return this.historyEntries
-        .map((entry, idx) => {
-          const when = new Date(entry.timestamp).toLocaleString();
-          const heading = `${idx + 1}. ${entry.action} - ${when}`;
-          const changes = Object.entries(entry.changes || {})
-            .map(([field, value]) => {
-              if (Object.prototype.hasOwnProperty.call(value, "from")) {
-                return `  - ${field}: "${value.from}" -> "${value.to}"`;
-              }
-              return `  - ${field}: "${value.to}"`;
-            })
-            .join("\n");
-          return `${heading}\n${changes}`;
-        })
-        .join("\n\n");
+    get historyRows() {
+      return (this.historyEntries || []).map((entry) => ({
+        created: entry.action || "UPDATED",
+        time: entry.timestamp ? new Date(entry.timestamp).toLocaleString() : "-",
+        changes: Object.entries(entry.changes || {})
+          .map(([field, value]) => {
+            if (Object.prototype.hasOwnProperty.call(value, "from")) {
+              return `${field}: "${value.from}" -> "${value.to}"`;
+            }
+            return `${field}: "${value.to}"`;
+          })
+          .join("\n"),
+      }));
     },
 
     setupFirebase() {
@@ -265,6 +258,32 @@ window.todoApp = function todoApp() {
         this.firebaseError = `Delete failed: ${err.message}`;
       } finally {
         this.saving = false;
+      }
+    },
+
+    async toggleTaskStatus(task) {
+      if (!this.db || !task || !task.id) return;
+      const fromStatus = task.status === "Closed" ? "Closed" : "Open";
+      const toStatus = fromStatus === "Open" ? "Closed" : "Open";
+      const confirmMessage = `Do you want change the status from ${fromStatus.toLowerCase()} to ${toStatus.toLowerCase()}?`;
+      if (!window.confirm(confirmMessage)) return;
+
+      const statusHistoryEntry = {
+        action: "UPDATED",
+        timestamp: new Date().toISOString(),
+        changes: {
+          status: { from: fromStatus, to: toStatus },
+        },
+      };
+
+      try {
+        await this.db.collection("m2do_tasks").doc(task.id).update({
+          status: toStatus,
+          history: [...(task.history || []), statusHistoryEntry],
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      } catch (err) {
+        this.firebaseError = `Status update failed: ${err.message}`;
       }
     },
 

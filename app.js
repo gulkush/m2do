@@ -1,10 +1,10 @@
 window.todoApp = function todoApp() {
   return {
-    assignees: ["MNB", "Shrawan", "Pradip", "SMB", "GMB"],
+    assignees: ["MNB", "SHR", "PRD", "SMB", "GMB"],
     assigneeRowClasses: {
       MNB: "bg-rose-50",
-      Shrawan: "bg-amber-50",
-      Pradip: "bg-emerald-50",
+      SHR: "bg-amber-50",
+      PRD: "bg-emerald-50",
       SMB: "bg-sky-50",
       GMB: "bg-violet-50",
     },
@@ -174,8 +174,8 @@ window.todoApp = function todoApp() {
         if (tab === "All") return "bg-slate-600 text-white";
         const active = {
           MNB: "bg-rose-600 text-white",
-          Shrawan: "bg-amber-600 text-white",
-          Pradip: "bg-emerald-600 text-white",
+          SHR: "bg-amber-600 text-white",
+          PRD: "bg-emerald-600 text-white",
           SMB: "bg-sky-600 text-white",
           GMB: "bg-violet-600 text-white",
         };
@@ -185,8 +185,8 @@ window.todoApp = function todoApp() {
       if (tab === "All") return "bg-slate-200 text-slate-700 hover:bg-slate-300";
       const inactive = {
         MNB: "bg-rose-100 text-rose-800 hover:bg-rose-200",
-        Shrawan: "bg-amber-100 text-amber-800 hover:bg-amber-200",
-        Pradip: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200",
+        SHR: "bg-amber-100 text-amber-800 hover:bg-amber-200",
+        PRD: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200",
         SMB: "bg-sky-100 text-sky-800 hover:bg-sky-200",
         GMB: "bg-violet-100 text-violet-800 hover:bg-violet-200",
       };

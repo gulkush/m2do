@@ -14,6 +14,8 @@ window.todoApp = function todoApp() {
     toastVisible: false,
     toastMessage: "",
     toastTimer: null,
+    email: "",
+    password: "",
     statusConfirmOpen: false,
     statusTargetTaskId: "",
     statusTargetTo: "Open",
@@ -29,6 +31,7 @@ window.todoApp = function todoApp() {
     authError: "",
     authLoading: false,
     authUser: null,
+    debugInfo: "",
     unsubscribeTasks: null,
     form: {
       date: "",
@@ -95,6 +98,12 @@ window.todoApp = function todoApp() {
 
     setupFirebase() {
       try {
+        const cfg = window.firebaseConfig || {};
+        const key = cfg.apiKey || "";
+        const keyPrefix = key ? `${key.slice(0, 8)}...` : "(missing)";
+        const projectId = cfg.projectId || "(missing)";
+        this.debugInfo = `Firebase config -> projectId: ${projectId}, apiKey: ${keyPrefix}`;
+
         if (!window.firebaseConfig || !window.firebaseConfig.apiKey || window.firebaseConfig.apiKey.includes("YOUR_")) {
           this.firebaseError = "Update firebase-config.js with your Firebase project values.";
           return;
@@ -114,7 +123,7 @@ window.todoApp = function todoApp() {
     setupAuthListener() {
       if (!this.auth) return;
 
-      this.auth.onAuthStateChanged(async (user) => {
+      this.auth.onAuthStateChanged((user) => {
         this.authUser = user;
 
         if (user) {
@@ -129,15 +138,7 @@ window.todoApp = function todoApp() {
         }
         this.tasks = [];
         this.modalOpen = false;
-
-        this.authLoading = true;
-        try {
-          await this.auth.signInAnonymously();
-        } catch (err) {
-          this.authError = `Anonymous sign-in failed: ${err.message}`;
-        } finally {
-          this.authLoading = false;
-        }
+        this.password = "";
       });
     },
 
@@ -333,7 +334,47 @@ window.todoApp = function todoApp() {
         this.authError = "Firebase Auth is not initialized.";
         return;
       }
+      const ok = window.confirm("Do you really want to sign out?");
+      if (!ok) return;
       await this.auth.signOut();
+    },
+
+    async signInWithEmail() {
+      if (!this.auth) return;
+      if (!this.email || !this.password) {
+        this.authError = "Enter email and password.";
+        return;
+      }
+
+      this.authLoading = true;
+      this.authError = "";
+      try {
+        await this.auth.signInWithEmailAndPassword(this.email, this.password);
+        this.showToast("Signed in.");
+      } catch (err) {
+        this.authError = `Sign in failed: ${err.message}`;
+      } finally {
+        this.authLoading = false;
+      }
+    },
+
+    async registerWithEmail() {
+      if (!this.auth) return;
+      if (!this.email || !this.password) {
+        this.authError = "Enter email and password.";
+        return;
+      }
+
+      this.authLoading = true;
+      this.authError = "";
+      try {
+        await this.auth.createUserWithEmailAndPassword(this.email, this.password);
+        this.showToast("Account created.");
+      } catch (err) {
+        this.authError = `Register failed: ${err.message}`;
+      } finally {
+        this.authLoading = false;
+      }
     },
 
     openCreateModal() {
@@ -497,7 +538,8 @@ window.todoApp = function todoApp() {
             status: this.form.status,
             history: this.buildCreateHistory(),
             createdByUid: this.authUser.uid,
-            createdByAuthType: this.authUser.isAnonymous ? "anonymous" : "user",
+            createdByAuthType: "password",
+            createdByEmail: this.authUser.email || "",
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
           });

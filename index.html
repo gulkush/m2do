@@ -93,7 +93,7 @@
               :aria-controls="`panel-${section}`"
               :aria-expanded="expandedSection === section"
               :aria-label="`Toggle ${section} tasks`"
-              class="mb-3 mt-6 flex w-full scroll-mt-36 items-center justify-between rounded-md px-2.5 py-2 text-left text-[13px] leading-tight [@media(min-width:376px)]:px-3 [@media(min-width:376px)]:text-sm font-semibold tracking-wide focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              class="mb-3 mt-6 flex min-h-10 w-full scroll-mt-36 items-center justify-between rounded-md px-3 py-1.5 text-left text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               :class="section === 'today' ? 'bg-cyan-50 text-cyan-800 mt-0' : (section === 'future' ? 'bg-indigo-50 text-indigo-800' : 'bg-slate-100 text-slate-800')"
             >
               <span x-text="sectionLabel(section)"></span>

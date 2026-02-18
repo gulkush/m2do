@@ -235,9 +235,10 @@ window.todoApp = function todoApp() {
     },
 
     setExpandedSection(section) {
-      this.expandedSection = section;
+      const isClosing = this.expandedSection === section;
+      this.expandedSection = isClosing ? "" : section;
       const el = document.getElementById(`section-${section}`);
-      if (el && window.innerWidth < 768) {
+      if (!isClosing && el && window.innerWidth < 768) {
         requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
       }
     },

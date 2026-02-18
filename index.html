@@ -258,7 +258,7 @@
             </div>
           </div>
 
-          <form @submit.prevent="saveTask()" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <form @submit.prevent="saveTask()" class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label class="flex flex-col gap-1 text-sm">
               <span class="font-medium text-slate-700">DATE</span>
               <input x-model="form.date" type="date" required class="rounded-md border border-slate-300 px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500" />
@@ -273,20 +273,12 @@
               </select>
             </label>
 
-            <label class="flex flex-col gap-1 text-sm">
-              <span class="font-medium text-slate-700">STATUS</span>
-              <select x-model="form.status" required class="rounded-md border border-slate-300 px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
-              </select>
-            </label>
-
-            <label class="flex flex-col gap-1 text-sm md:col-span-3">
+            <label class="flex flex-col gap-1 text-sm md:col-span-2">
               <span class="font-medium text-slate-700">SUBJECT</span>
               <input x-model.trim="form.subject" type="text" required class="rounded-md border border-slate-300 px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500" />
             </label>
 
-            <label class="flex flex-col gap-1 text-sm md:col-span-3">
+            <label class="flex flex-col gap-1 text-sm md:col-span-2">
               <span class="font-medium text-slate-700">DETAILS</span>
               <span class="text-xs text-slate-500">Optional</span>
               <textarea
@@ -296,7 +288,7 @@
               ></textarea>
             </label>
 
-            <div class="md:col-span-3 sticky bottom-0 -mx-3 [@media(min-width:376px)]:-mx-4 flex justify-end gap-2 bg-white/95 px-3 [@media(min-width:376px)]:px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:static sm:mx-0 sm:bg-transparent sm:p-0">
+            <div class="md:col-span-2 sticky bottom-0 -mx-3 [@media(min-width:376px)]:-mx-4 flex justify-end gap-2 bg-white/95 px-3 [@media(min-width:376px)]:px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:static sm:mx-0 sm:bg-transparent sm:p-0">
               <button type="button" @click="closeModal()" class="rounded-md border border-slate-300 px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
               <button
                 type="submit"

@@ -189,7 +189,8 @@ window.todoApp = function todoApp() {
     },
 
     statusButtonText(task) {
-      return this.statusUpdatingId === task.id ? "..." : task.status;
+      if (this.statusUpdatingId === task.id) return "...";
+      return task.status === "Open" ? "Done" : "Undone";
     },
 
     toTabClass(tab) {

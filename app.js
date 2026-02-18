@@ -253,11 +253,10 @@ window.todoApp = function todoApp() {
       if (this.filterSwipeStartX === null || this.filterSwipeStartY === null) return;
 
       const deltaX = endX - this.filterSwipeStartX;
-      const deltaY = endY - this.filterSwipeStartY;
       this.cancelFilterSwipe();
 
       // Only handle intentional horizontal swipes.
-      if (Math.abs(deltaX) < 24 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+      if (Math.abs(deltaX) < 24) return;
       this.shiftToTab(deltaX < 0 ? 1 : -1);
     },
 
@@ -265,9 +264,11 @@ window.todoApp = function todoApp() {
       const now = Date.now();
       if (now - this.lastFilterWheelAt < 220) return;
 
-      const deltaX = event.deltaX || 0;
-      const deltaY = event.deltaY || 0;
-      if (Math.abs(deltaX) < 12 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+      let deltaX = event.deltaX || 0;
+      if (Math.abs(deltaX) < 4 && event.shiftKey) {
+        deltaX = event.deltaY || 0;
+      }
+      if (Math.abs(deltaX) < 8) return;
 
       this.lastFilterWheelAt = now;
       this.shiftToTab(deltaX > 0 ? 1 : -1);

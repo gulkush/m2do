@@ -185,7 +185,7 @@ window.todoApp = function todoApp() {
     },
 
     statusClass(task) {
-      return task.status === "Open" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700";
+      return task.status === "Open" ? "bg-white text-emerald-800" : "bg-white text-slate-700";
     },
 
     toTabClass(tab) {

@@ -563,9 +563,5 @@ window.todoApp = function todoApp() {
     editAriaLabel(task, field) {
       return `Edit task ${field} for ${task.subject}`;
     },
-
-    detailText(task) {
-      return task.details && task.details.trim() ? task.details : "No details";
-    },
   };
 };

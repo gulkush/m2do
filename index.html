@@ -111,7 +111,7 @@
                   <div class="rounded-md border border-slate-200 bg-slate-50 px-3 py-6 text-center text-sm text-slate-500" x-text="sectionEmptyLabel(section)"></div>
                 </template>
                 <template x-for="task in sectionTasks(section)" :key="task.id">
-                  <article class="rounded-lg border-2 p-2.5 [@media(min-width:376px)]:p-3" :class="cardContainerClass(task)">
+                  <article class="rounded-lg border-0 p-2.5 [@media(min-width:376px)]:p-3" :class="cardContainerClass(task)">
                     <div class="flex items-stretch justify-between gap-3">
                       <button
                         @click="openEditModal(task)"

@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="./firebase-config.js"></script>
-    <script defer src="./app.js"></script>
+    <script defer src="./app.js?v=20260218-1"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
   </head>
   <body class="min-h-screen bg-slate-100 text-slate-900">
@@ -127,7 +127,7 @@
                         <button
                           @click="openHistoryModal(task)"
                           :aria-label="historyAriaLabel(task)"
-                          class="min-h-8 min-w-16 rounded bg-slate-600 px-2 py-1 text-xs font-semibold text-white hover:bg-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                          class="min-h-8 min-w-16 rounded border border-white bg-slate-600 px-2 py-1 text-xs font-semibold text-white hover:bg-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
                           title="View history"
                           x-text="'History'"
                         >
@@ -136,7 +136,7 @@
                           @click="openStatusConfirm(task)"
                           :aria-label="statusAriaLabel(task)"
                           :disabled="statusUpdatingId === task.id"
-                          class="min-h-8 min-w-16 rounded px-2 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-50"
+                          class="min-h-8 min-w-16 rounded border border-white px-2 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-50"
                           :class="statusClass(task)"
                           x-text="statusButtonText(task)"
                         ></button>
@@ -246,10 +246,11 @@
             <h2 class="text-lg font-semibold" x-text="editingTaskId ? 'Edit Task' : 'Create Task'"></h2>
             <div class="flex items-center gap-2">
               <button
-                x-show="canDeleteCurrentTask"
-                @click="deleteCurrentTask()"
+                x-show="editingTaskId"
+                @click.stop.prevent="deleteCurrentTask()"
+                :disabled="saving"
                 type="button"
-                class="rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-500"
+                class="rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-60"
                 style="display: none"
               >
                 Delete

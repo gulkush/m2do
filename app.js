@@ -90,12 +90,6 @@ window.todoApp = function todoApp() {
       }));
     },
 
-    get canDeleteCurrentTask() {
-      if (!this.editingTaskId) return false;
-      const detailsValue = (this.form.details || "").trim();
-      return this.form.status === "Closed" && detailsValue === "";
-    },
-
     setupFirebase() {
       try {
         const cfg = window.firebaseConfig || {};
@@ -422,14 +416,22 @@ window.todoApp = function todoApp() {
     },
 
     async deleteCurrentTask() {
-      if (!this.db || !this.editingTaskId || !this.canDeleteCurrentTask) return;
-      const ok = window.confirm("Delete this closed task?");
+      if (!this.db) {
+        this.firebaseError = "Delete failed: database is not initialized.";
+        return;
+      }
+      if (!this.editingTaskId) {
+        this.firebaseError = "Delete failed: task id is missing.";
+        return;
+      }
+      const ok = window.confirm("Delete this task?");
       if (!ok) return;
 
       this.saving = true;
       try {
         await this.db.collection("m2do_tasks").doc(this.editingTaskId).delete();
         this.closeModal();
+        this.showToast("Task deleted.");
       } catch (err) {
         this.firebaseError = `Delete failed: ${err.message}`;
       } finally {

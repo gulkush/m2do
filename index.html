@@ -27,8 +27,12 @@
       <div x-show="authUser" class="sticky top-0 z-30 mb-3 rounded-xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-sm" style="display: none">
         <div
           class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          @pointerdown="startFilterPointerSwipe($event)"
+          @pointerup.window="endFilterPointerSwipe($event)"
+          @pointercancel.window="cancelFilterSwipe()"
           @touchstart.passive="startFilterSwipe($event)"
-          @touchend.passive="endFilterSwipe($event)"
+          @touchend.window.passive="endFilterSwipe($event)"
+          @touchcancel.window.passive="cancelFilterSwipe()"
         >
           <template x-for="tab in toTabs" :key="tab">
             <button

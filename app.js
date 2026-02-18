@@ -216,29 +216,47 @@ window.todoApp = function todoApp() {
 
     startFilterSwipe(event) {
       if (!event.touches || event.touches.length !== 1) return;
-      this.filterSwipeStartX = event.touches[0].clientX;
-      this.filterSwipeStartY = event.touches[0].clientY;
+      this.recordFilterSwipeStart(event.touches[0].clientX, event.touches[0].clientY);
     },
 
     endFilterSwipe(event) {
-      if (
-        this.filterSwipeStartX === null ||
-        this.filterSwipeStartY === null ||
-        !event.changedTouches ||
-        event.changedTouches.length !== 1
-      ) {
-        this.filterSwipeStartX = null;
-        this.filterSwipeStartY = null;
+      if (!event.changedTouches || event.changedTouches.length !== 1) {
+        this.cancelFilterSwipe();
         return;
       }
+      this.handleFilterSwipeEnd(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+    },
 
-      const deltaX = event.changedTouches[0].clientX - this.filterSwipeStartX;
-      const deltaY = event.changedTouches[0].clientY - this.filterSwipeStartY;
+    startFilterPointerSwipe(event) {
+      // Primary pointer only; keeps regular clicks/taps working.
+      if (!event.isPrimary) return;
+      this.recordFilterSwipeStart(event.clientX, event.clientY);
+    },
+
+    endFilterPointerSwipe(event) {
+      if (!event.isPrimary) return;
+      this.handleFilterSwipeEnd(event.clientX, event.clientY);
+    },
+
+    cancelFilterSwipe() {
       this.filterSwipeStartX = null;
       this.filterSwipeStartY = null;
+    },
+
+    recordFilterSwipeStart(x, y) {
+      this.filterSwipeStartX = x;
+      this.filterSwipeStartY = y;
+    },
+
+    handleFilterSwipeEnd(endX, endY) {
+      if (this.filterSwipeStartX === null || this.filterSwipeStartY === null) return;
+
+      const deltaX = endX - this.filterSwipeStartX;
+      const deltaY = endY - this.filterSwipeStartY;
+      this.cancelFilterSwipe();
 
       // Only handle intentional horizontal swipes.
-      if (Math.abs(deltaX) < 36 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+      if (Math.abs(deltaX) < 24 || Math.abs(deltaX) < Math.abs(deltaY)) return;
       this.shiftToTab(deltaX < 0 ? 1 : -1);
     },
 

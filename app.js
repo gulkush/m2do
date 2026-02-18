@@ -33,6 +33,8 @@ window.todoApp = function todoApp() {
     authUser: null,
     debugInfo: "",
     unsubscribeTasks: null,
+    filterSwipeStartX: null,
+    filterSwipeStartY: null,
     form: {
       date: "",
       to: "",
@@ -210,6 +212,56 @@ window.todoApp = function todoApp() {
         GMB: "bg-violet-100 text-violet-800 hover:bg-violet-200",
       };
       return inactive[tab] || "bg-slate-100 text-slate-700 hover:bg-slate-200";
+    },
+
+    startFilterSwipe(event) {
+      if (!event.touches || event.touches.length !== 1) return;
+      this.filterSwipeStartX = event.touches[0].clientX;
+      this.filterSwipeStartY = event.touches[0].clientY;
+    },
+
+    endFilterSwipe(event) {
+      if (
+        this.filterSwipeStartX === null ||
+        this.filterSwipeStartY === null ||
+        !event.changedTouches ||
+        event.changedTouches.length !== 1
+      ) {
+        this.filterSwipeStartX = null;
+        this.filterSwipeStartY = null;
+        return;
+      }
+
+      const deltaX = event.changedTouches[0].clientX - this.filterSwipeStartX;
+      const deltaY = event.changedTouches[0].clientY - this.filterSwipeStartY;
+      this.filterSwipeStartX = null;
+      this.filterSwipeStartY = null;
+
+      // Only handle intentional horizontal swipes.
+      if (Math.abs(deltaX) < 36 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+      this.shiftToTab(deltaX < 0 ? 1 : -1);
+    },
+
+    shiftToTab(step) {
+      const tabs = this.toTabs;
+      const currentIndex = tabs.indexOf(this.selectedToTab);
+      if (currentIndex < 0) {
+        this.selectedToTab = tabs[0];
+        return;
+      }
+
+      const nextIndex = Math.min(tabs.length - 1, Math.max(0, currentIndex + step));
+      if (nextIndex === currentIndex) return;
+
+      const nextTab = tabs[nextIndex];
+      this.selectedToTab = nextTab;
+
+      requestAnimationFrame(() => {
+        const target = document.querySelector(`[data-to-tab="${nextTab}"]`);
+        if (target && target.scrollIntoView) {
+          target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        }
+      });
     },
 
     sectionTasks(section) {

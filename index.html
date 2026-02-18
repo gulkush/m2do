@@ -25,10 +25,15 @@
       </div>
 
       <div x-show="authUser" class="sticky top-0 z-30 mb-3 rounded-xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-sm" style="display: none">
-        <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          @touchstart.passive="startFilterSwipe($event)"
+          @touchend.passive="endFilterSwipe($event)"
+        >
           <template x-for="tab in toTabs" :key="tab">
             <button
               @click="selectedToTab = tab"
+              :data-to-tab="tab"
               :aria-label="`Filter by ${tab}`"
               class="min-h-10 shrink-0 rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               :class="toTabClass(tab)"

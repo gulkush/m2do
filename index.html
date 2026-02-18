@@ -14,36 +14,28 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
   </head>
   <body class="min-h-screen bg-slate-100 text-slate-900">
-    <div x-data="todoApp()" x-init="init()" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div class="sticky top-0 z-30 bg-slate-100 pb-3">
+    <div x-data="todoApp()" x-init="init()" class="mx-auto max-w-7xl px-3 py-3 [@media(min-width:376px)]:px-4 [@media(min-width:376px)]:py-4 sm:px-6 sm:py-8 lg:px-8">
+      <div class="bg-slate-100 pb-3">
         <header class="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 class="text-3xl font-bold tracking-tight">List (M2Do)</h1>
+            <h1 class="text-2xl font-bold tracking-tight [@media(min-width:376px)]:text-3xl">List (M2Do)</h1>
             <p class="hidden text-sm text-slate-600 sm:block">Tasks grouped by assignee and date bucket.</p>
           </div>
-          <button
-            x-show="authUser"
-            @click="openCreateModal()"
-            class="inline-flex min-h-10 items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-            style="display: none"
-          >
-            + Add New
-          </button>
         </header>
+      </div>
 
-        <div x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
-          <div class="flex flex-wrap gap-2">
-            <template x-for="tab in toTabs" :key="tab">
-              <button
-                @click="selectedToTab = tab"
-                :aria-label="`Filter by ${tab}`"
-                class="min-h-10 rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                :class="toTabClass(tab)"
-              >
-                <span x-text="`${tab} (${taskCountForToTab(tab)})`"></span>
-              </button>
-            </template>
-          </div>
+      <div x-show="authUser" class="sticky top-0 z-30 mb-3 rounded-xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-sm" style="display: none">
+        <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <template x-for="tab in toTabs" :key="tab">
+            <button
+              @click="selectedToTab = tab"
+              :aria-label="`Filter by ${tab}`"
+              class="min-h-10 shrink-0 rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              :class="toTabClass(tab)"
+            >
+              <span x-text="`${tab} (${taskCountForToTab(tab)})`"></span>
+            </button>
+          </template>
         </div>
       </div>
       <div
@@ -56,7 +48,7 @@
         class="mb-4 rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700"
         x-text="authError"
       ></div>
-      <section x-show="!authUser" class="mb-4 rounded-xl bg-white p-4 shadow-sm" style="display: none">
+      <section x-show="!authUser" class="mb-4 rounded-xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-sm" style="display: none">
         <h2 class="mb-3 text-base font-semibold text-slate-900">Email Login</h2>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
           <label class="flex flex-col gap-1 text-sm md:col-span-2">
@@ -91,9 +83,9 @@
           </label>
         </div>
       </section>
-      <section x-show="authUser" class="rounded-xl bg-white p-4 shadow-sm" style="display: none">
+      <section x-show="authUser" class="rounded-xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-sm" style="display: none">
         <template x-for="section in ['today', 'future', 'closed']" :key="section">
-          <div>
+          <div class="relative">
             <button
               :id="`section-${section}`"
               type="button"
@@ -101,7 +93,7 @@
               :aria-controls="`panel-${section}`"
               :aria-expanded="expandedSection === section"
               :aria-label="`Toggle ${section} tasks`"
-              class="mb-3 mt-6 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm font-semibold tracking-wide focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              class="mb-3 mt-6 flex w-full scroll-mt-36 items-center justify-between rounded-md px-2.5 py-2 text-left text-[13px] leading-tight [@media(min-width:376px)]:px-3 [@media(min-width:376px)]:text-sm font-semibold tracking-wide focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               :class="section === 'today' ? 'bg-cyan-50 text-cyan-800 mt-0' : (section === 'future' ? 'bg-indigo-50 text-indigo-800' : 'bg-slate-100 text-slate-800')"
             >
               <span x-text="sectionLabel(section)"></span>
@@ -111,7 +103,7 @@
             <div
               :id="`panel-${section}`"
               x-show="expandedSection === section"
-              class="max-h-[22rem] overflow-auto"
+              class="overflow-visible pb-16 md:max-h-[22rem] md:overflow-auto"
               style="display: none"
             >
               <div class="md:hidden space-y-3">
@@ -119,7 +111,7 @@
                   <div class="rounded-md border border-slate-200 bg-slate-50 px-3 py-6 text-center text-sm text-slate-500" x-text="sectionEmptyLabel(section)"></div>
                 </template>
                 <template x-for="task in sectionTasks(section)" :key="task.id">
-                  <article class="rounded-lg border p-3" :class="cardContainerClass(task)">
+                  <article class="rounded-lg border p-2.5 [@media(min-width:376px)]:p-3" :class="cardContainerClass(task)">
                     <div class="flex items-stretch justify-between gap-3">
                       <div class="min-w-0 flex-1">
                         <button
@@ -131,7 +123,7 @@
                         <p class="mt-1 text-xs text-slate-600" x-text="`${task.date} | ${task.to}`"></p>
                         <p class="mt-2 text-xs text-slate-700" x-text="detailText(task)"></p>
                       </div>
-                      <div class="flex flex-col items-end gap-2">
+                      <div class="flex flex-col items-end gap-1.5 [@media(min-width:376px)]:gap-2">
                         <button
                           @click="openHistoryModal(task)"
                           :aria-label="historyAriaLabel(task)"
@@ -212,16 +204,21 @@
               </div>
             </div>
 
-            <div x-show="expandedSection === section" class="mt-2 flex justify-center" style="display: none">
+            <div
+              x-show="expandedSection === section"
+              class="absolute bottom-3 right-3 z-20"
+              style="display: none"
+            >
               <button
                 type="button"
                 @click="copySectionTasks(section)"
                 :disabled="copyButtonDisabled(section)"
                 :aria-label="`Copy ${section} tasks`"
-                class="rounded px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                class="h-12 w-12 rounded-full p-0 text-base font-semibold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                 :class="section === 'today' ? 'bg-cyan-700 hover:bg-cyan-600' : (section === 'future' ? 'bg-indigo-700 hover:bg-indigo-600' : 'bg-slate-700 hover:bg-slate-600')"
-                x-text="copyButtonLabel(section)"
-              ></button>
+              >
+                <span class="text-base leading-none" x-text="copyFeedback[section] ? '✓' : '⧉'"></span>
+              </button>
             </div>
           </div>
         </template>
@@ -241,10 +238,10 @@
       <div
         x-show="modalOpen"
         x-transition.opacity
-        class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 p-4"
+        class="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/60 p-2 sm:items-center sm:p-4"
         style="display: none"
       >
-        <div @click.outside="closeModal()" class="w-full max-w-3xl rounded-xl bg-white p-5 shadow-xl">
+        <div @click.outside="closeModal()" class="w-full max-w-3xl max-h-[90dvh] overflow-y-auto rounded-t-2xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-xl sm:rounded-xl sm:p-5">
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold" x-text="editingTaskId ? 'Edit Task' : 'Create Task'"></h2>
             <div class="flex items-center gap-2">
@@ -257,7 +254,7 @@
               >
                 Delete
               </button>
-              <button @click="closeModal()" class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+              <button @click="closeModal()" class="min-h-10 min-w-10 rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
             </div>
           </div>
 
@@ -299,7 +296,7 @@
               ></textarea>
             </label>
 
-            <div class="md:col-span-3 flex justify-end gap-2 pt-2">
+            <div class="md:col-span-3 sticky bottom-0 -mx-3 [@media(min-width:376px)]:-mx-4 flex justify-end gap-2 bg-white/95 px-3 [@media(min-width:376px)]:px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:static sm:mx-0 sm:bg-transparent sm:p-0">
               <button type="button" @click="closeModal()" class="rounded-md border border-slate-300 px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
               <button
                 type="submit"
@@ -316,24 +313,24 @@
       <div
         x-show="statusConfirmOpen"
         x-transition.opacity
-        class="fixed inset-0 z-[55] flex items-center justify-center bg-slate-900/60 p-4"
+        class="fixed inset-0 z-[55] flex items-end justify-center bg-slate-900/60 p-2 sm:items-center sm:p-4"
         style="display: none"
       >
-        <div @click.outside="closeStatusConfirm()" class="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+        <div @click.outside="closeStatusConfirm()" class="w-full max-w-md rounded-t-2xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-xl sm:rounded-xl sm:p-5">
           <h3 class="text-base font-semibold text-slate-900">Change Status</h3>
           <p class="mt-2 text-sm text-slate-700" x-text="statusConfirmMessage()"></p>
           <div class="mt-4 flex justify-end gap-2">
             <button
               type="button"
               @click="closeStatusConfirm()"
-              class="rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              class="min-h-11 rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             >
               Cancel
             </button>
             <button
               type="button"
               @click="confirmStatusChange()"
-              class="rounded-md bg-slate-700 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              class="min-h-11 rounded-md bg-slate-700 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             >
               Confirm
             </button>
@@ -344,15 +341,15 @@
       <div
         x-show="historyModalOpen"
         x-transition.opacity
-        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4"
+        class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-2 sm:items-center sm:p-4"
         style="display: none"
       >
-        <div @click.outside="closeHistoryModal()" class="w-full max-w-3xl rounded-xl bg-white p-5 shadow-xl">
+        <div @click.outside="closeHistoryModal()" class="w-full max-w-3xl max-h-[90dvh] overflow-y-auto rounded-t-2xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-xl sm:rounded-xl sm:p-5">
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold">History: <span x-text="historyTaskTitle"></span></h2>
-            <button @click="closeHistoryModal()" class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+            <button @click="closeHistoryModal()" class="min-h-10 min-w-10 rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
           </div>
-          <div class="max-h-[22rem] overflow-auto">
+          <div class="overflow-auto md:max-h-[22rem]">
             <table class="min-w-full divide-y divide-slate-200">
               <thead class="bg-slate-50">
                 <tr>
@@ -383,7 +380,7 @@
       <div
         x-show="toastVisible"
         x-transition.opacity.duration.200ms
-        class="fixed bottom-4 right-4 z-[60] rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white shadow-lg"
+        class="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] left-4 right-4 z-[60] rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white shadow-lg sm:left-auto sm:right-4"
         style="display: none"
       >
         <div class="flex items-center gap-2">
@@ -391,6 +388,16 @@
           <button @click="closeToast()" class="rounded px-1 py-0.5 text-xs text-slate-200 hover:bg-slate-700">x</button>
         </div>
       </div>
+
+      <button
+        x-show="authUser && !modalOpen && !historyModalOpen && !statusConfirmOpen"
+        @click="openCreateModal()"
+        :aria-label="'Add new task'"
+        class="fixed bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] right-4 z-[65] inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-3xl leading-none text-white shadow-xl hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:bottom-6"
+        style="display: none"
+      >
+        +
+      </button>
     </div>
   </body>
 </html>

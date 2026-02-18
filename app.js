@@ -33,9 +33,6 @@ window.todoApp = function todoApp() {
     authUser: null,
     debugInfo: "",
     unsubscribeTasks: null,
-    filterSwipeStartX: null,
-    filterSwipeStartY: null,
-    lastFilterWheelAt: 0,
     form: {
       date: "",
       to: "",
@@ -213,87 +210,6 @@ window.todoApp = function todoApp() {
         GMB: "bg-violet-100 text-violet-800 hover:bg-violet-200",
       };
       return inactive[tab] || "bg-slate-100 text-slate-700 hover:bg-slate-200";
-    },
-
-    startFilterSwipe(event) {
-      if (!event.touches || event.touches.length !== 1) return;
-      this.recordFilterSwipeStart(event.touches[0].clientX, event.touches[0].clientY);
-    },
-
-    endFilterSwipe(event) {
-      if (!event.changedTouches || event.changedTouches.length !== 1) {
-        this.cancelFilterSwipe();
-        return;
-      }
-      this.handleFilterSwipeEnd(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
-    },
-
-    startFilterPointerSwipe(event) {
-      // Primary pointer only; keeps regular clicks/taps working.
-      if (!event.isPrimary) return;
-      this.recordFilterSwipeStart(event.clientX, event.clientY);
-    },
-
-    endFilterPointerSwipe(event) {
-      if (!event.isPrimary) return;
-      this.handleFilterSwipeEnd(event.clientX, event.clientY);
-    },
-
-    cancelFilterSwipe() {
-      this.filterSwipeStartX = null;
-      this.filterSwipeStartY = null;
-    },
-
-    recordFilterSwipeStart(x, y) {
-      this.filterSwipeStartX = x;
-      this.filterSwipeStartY = y;
-    },
-
-    handleFilterSwipeEnd(endX, endY) {
-      if (this.filterSwipeStartX === null || this.filterSwipeStartY === null) return;
-
-      const deltaX = endX - this.filterSwipeStartX;
-      this.cancelFilterSwipe();
-
-      // Only handle intentional horizontal swipes.
-      if (Math.abs(deltaX) < 24) return;
-      this.shiftToTab(deltaX < 0 ? 1 : -1);
-    },
-
-    handleFilterWheel(event) {
-      const now = Date.now();
-      if (now - this.lastFilterWheelAt < 220) return;
-
-      let deltaX = event.deltaX || 0;
-      if (Math.abs(deltaX) < 4 && event.shiftKey) {
-        deltaX = event.deltaY || 0;
-      }
-      if (Math.abs(deltaX) < 8) return;
-
-      this.lastFilterWheelAt = now;
-      this.shiftToTab(deltaX > 0 ? 1 : -1);
-    },
-
-    shiftToTab(step) {
-      const tabs = this.toTabs;
-      const currentIndex = tabs.indexOf(this.selectedToTab);
-      if (currentIndex < 0) {
-        this.selectedToTab = tabs[0];
-        return;
-      }
-
-      const nextIndex = Math.min(tabs.length - 1, Math.max(0, currentIndex + step));
-      if (nextIndex === currentIndex) return;
-
-      const nextTab = tabs[nextIndex];
-      this.selectedToTab = nextTab;
-
-      requestAnimationFrame(() => {
-        const target = document.querySelector(`[data-to-tab="${nextTab}"]`);
-        if (target && target.scrollIntoView) {
-          target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-        }
-      });
     },
 
     sectionTasks(section) {

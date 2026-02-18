@@ -25,19 +25,10 @@
       </div>
 
       <div x-show="authUser" class="sticky top-0 z-30 mb-3 rounded-xl bg-white p-3 [@media(min-width:376px)]:p-4 shadow-sm" style="display: none">
-        <div
-          class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          @pointerdown="startFilterPointerSwipe($event)"
-          @pointerup.window="endFilterPointerSwipe($event)"
-          @pointercancel.window="cancelFilterSwipe()"
-          @touchstart.passive="startFilterSwipe($event)"
-          @touchend.window.passive="endFilterSwipe($event)"
-          @touchcancel.window.passive="cancelFilterSwipe()"
-        >
+        <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <template x-for="tab in toTabs" :key="tab">
             <button
               @click="selectedToTab = tab"
-              :data-to-tab="tab"
               :aria-label="`Filter by ${tab}`"
               class="min-h-10 shrink-0 rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               :class="toTabClass(tab)"
@@ -180,12 +171,7 @@
                 </template>
               </div>
 
-              <div
-                class="hidden md:block"
-                @pointerdown="startFilterPointerSwipe($event)"
-                @touchstart.passive="startFilterSwipe($event)"
-                @wheel="handleFilterWheel($event)"
-              >
+              <div class="hidden md:block">
                 <table class="min-w-full divide-y divide-slate-200">
                   <thead class="bg-slate-50">
                     <tr>

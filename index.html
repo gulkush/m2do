@@ -126,19 +126,48 @@
                         <button
                           @click="openHistoryModal(task)"
                           :aria-label="historyAriaLabel(task)"
-                          class="min-h-8 min-w-16 rounded border-2 border-slate-400 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                          class="h-10 w-10 rounded-md border-2 border-slate-400 bg-white p-2.5 text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
                           title="View history"
-                          x-text="'History'"
                         >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.27 2.943 9.542 7-1.273 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
                         </button>
                         <button
                           @click="openStatusConfirm(task)"
                           :aria-label="statusAriaLabel(task)"
                           :disabled="statusUpdatingId === task.id"
-                          class="min-h-8 min-w-16 rounded border-2 border-slate-400 px-2 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-50"
+                          class="h-10 w-10 rounded-md border-2 border-slate-400 p-2.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-50"
                           :class="statusClass(task)"
-                          x-text="statusButtonText(task)"
-                        ></button>
+                        >
+                          <span x-show="statusUpdatingId === task.id">...</span>
+                          <svg
+                            x-show="statusUpdatingId !== task.id && task.status === 'Open'"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-full w-full"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            aria-hidden="true"
+                          >
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                          </svg>
+                          <svg
+                            x-show="statusUpdatingId !== task.id && task.status !== 'Open'"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-full w-full"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            aria-hidden="true"
+                          >
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 1 0 3-6.7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4v5h5"/>
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </article>
@@ -191,10 +220,36 @@
                             @click="openStatusConfirm(task)"
                             :aria-label="statusAriaLabel(task)"
                             :disabled="statusUpdatingId === task.id"
-                            class="min-h-10 min-w-20 rounded border-2 border-slate-400 px-2 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                            class="h-10 w-10 rounded-md border-2 border-slate-400 p-2.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
                             :class="statusClass(task)"
-                            x-text="statusButtonText(task)"
-                          ></button>
+                          >
+                            <span x-show="statusUpdatingId === task.id">...</span>
+                            <svg
+                              x-show="statusUpdatingId !== task.id && task.status === 'Open'"
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-full w-full"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="3"
+                              aria-hidden="true"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <svg
+                              x-show="statusUpdatingId !== task.id && task.status !== 'Open'"
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-full w-full"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                              aria-hidden="true"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 1 0 3-6.7"/>
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 4v5h5"/>
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     </template>

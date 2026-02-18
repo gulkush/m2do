@@ -188,11 +188,6 @@ window.todoApp = function todoApp() {
       return task.status === "Open" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700";
     },
 
-    statusButtonText(task) {
-      if (this.statusUpdatingId === task.id) return "...";
-      return task.status === "Open" ? "Done" : "Undone";
-    },
-
     toTabClass(tab) {
       if (this.selectedToTab === tab) {
         if (tab === "All") return "bg-slate-600 text-white";

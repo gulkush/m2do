@@ -175,13 +175,13 @@ window.todoApp = function todoApp() {
 
     cardContainerClass(task) {
       const map = {
-        MNB: "border-rose-200 bg-rose-50/60",
-        SHR: "border-amber-200 bg-amber-50/60",
-        PRD: "border-emerald-200 bg-emerald-50/60",
-        SMB: "border-sky-200 bg-sky-50/60",
-        GMB: "border-violet-200 bg-violet-50/60",
+        MNB: "border-rose-400 bg-rose-50/60",
+        SHR: "border-amber-400 bg-amber-50/60",
+        PRD: "border-emerald-400 bg-emerald-50/60",
+        SMB: "border-sky-400 bg-sky-50/60",
+        GMB: "border-violet-400 bg-violet-50/60",
       };
-      return map[task.to] || "border-slate-200 bg-slate-50";
+      return map[task.to] || "border-slate-400 bg-slate-50";
     },
 
     statusClass(task) {

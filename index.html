@@ -180,7 +180,12 @@
                 </template>
               </div>
 
-              <div class="hidden md:block">
+              <div
+                class="hidden md:block"
+                @pointerdown="startFilterPointerSwipe($event)"
+                @touchstart.passive="startFilterSwipe($event)"
+                @wheel="handleFilterWheel($event)"
+              >
                 <table class="min-w-full divide-y divide-slate-200">
                   <thead class="bg-slate-50">
                     <tr>

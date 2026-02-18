@@ -35,6 +35,7 @@ window.todoApp = function todoApp() {
     unsubscribeTasks: null,
     filterSwipeStartX: null,
     filterSwipeStartY: null,
+    lastFilterWheelAt: 0,
     form: {
       date: "",
       to: "",
@@ -258,6 +259,18 @@ window.todoApp = function todoApp() {
       // Only handle intentional horizontal swipes.
       if (Math.abs(deltaX) < 24 || Math.abs(deltaX) < Math.abs(deltaY)) return;
       this.shiftToTab(deltaX < 0 ? 1 : -1);
+    },
+
+    handleFilterWheel(event) {
+      const now = Date.now();
+      if (now - this.lastFilterWheelAt < 220) return;
+
+      const deltaX = event.deltaX || 0;
+      const deltaY = event.deltaY || 0;
+      if (Math.abs(deltaX) < 12 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+      this.lastFilterWheelAt = now;
+      this.shiftToTab(deltaX > 0 ? 1 : -1);
     },
 
     shiftToTab(step) {
